@@ -21,14 +21,18 @@ Turn any folder of files into a navigable knowledge graph with blazingly fast AS
 
 Follow these steps in order based on the user's command.
 
-### Step 1 - Ensure graphify-rs is compiled
+### Step 1 - Ensure graphify-rs is installed
 
-Check if the release binary exists. If not, compile it automatically.
+Check if `graphify-rs` is in the system PATH. If not, install it globally using Cargo so it can be run from anywhere.
 
 ```bash
-if [ ! -f "target/release/graphify-rs" ]; then
-    echo "Compiling graphify-rs..."
-    cargo build --release
+if ! command -v graphify-rs &> /dev/null; then
+    echo "Installing graphify-rs globally..."
+    if [ -f "Cargo.toml" ] && grep -q 'name = "graphify-rs"' Cargo.toml; then
+        cargo install --path .
+    else
+        cargo install --git https://github.com/xfwgithub/graphify-rs.git
+    fi
 fi
 ```
 
@@ -64,7 +68,7 @@ Run the extraction on the target directory, importing the semantic JSON you just
 
 ```bash
 TARGET_PATH="${1:-.}"
-./target/release/graphify-rs --target "$TARGET_PATH" --import-semantic .graphify_semantic.json --out ./graphify-out-rs
+graphify-rs --target "$TARGET_PATH" --import-semantic .graphify_semantic.json --out ./graphify-out-rs
 ```
 
 ### Step 5 - Read and Analyze the Graph
