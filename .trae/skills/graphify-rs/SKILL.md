@@ -5,22 +5,38 @@ description: "Turn any codebase into a navigable knowledge graph using the high-
 
 # /graphify-rs
 
-This skill uses `graphify-rs` (the ultra-fast Rust port of graphify) to scan the current codebase and generate a knowledge graph (`graph.json`) containing code AST and Markdown relations.
+Turn any folder of files into a navigable knowledge graph with blazingly fast AST/Markdown parsing, community detection, and zero Python/LLM overhead.
 
 ## Usage
 
 ```bash
-/graphify-rs                          # Full pipeline on current directory
-/graphify-rs <path>                   # Full pipeline on specific path
+/graphify-rs                               # full pipeline on current directory
+/graphify-rs <path>                        # full pipeline on specific path
 ```
 
+## What graphify-rs is for
+
+`graphify-rs` is built around the concept of instantly understanding complex codebases. Drop it into any repository, and get a structured knowledge graph that shows you what you didn't know was connected.
+
+Three things it does that Claude alone cannot:
+1. **Persistent graph** - relationships are extracted natively and stored in `graphify-out-rs/graph.json`. You can query the architecture without reading thousands of files into context.
+2. **Deterministic Speed** - Instead of slow LLM-based semantic extraction, it uses `tree-sitter` and `pulldown-cmark` to parse code and Markdown in milliseconds.
+3. **Cross-document surprise** - Built-in Leiden community detection finds connections between concepts in different modules that you would never think to ask about directly.
+
+Use it for:
+- A codebase you're new to (understand architecture before touching anything)
+- Discovering "God Nodes" (the most central/coupled files in a project)
+- Finding "Surprising Connections" (how seemingly unrelated communities interact)
+
 ## What You Must Do When Invoked
+
+If no path was given, use `.` (current directory). Do not ask the user for a path.
 
 Follow these steps in order. Do not skip steps.
 
 ### Step 1 - Ensure graphify-rs is compiled
 
-Check if the release binary exists. If not, compile it:
+Check if the release binary exists. If not, compile it automatically. Do not ask the user.
 
 ```bash
 if [ ! -f "target/release/graphify-rs" ]; then
@@ -31,19 +47,28 @@ fi
 
 ### Step 2 - Run Extraction
 
-Run the extraction on the target directory (defaulting to `.` if no path was provided).
+Run the extraction on the target directory.
 
 ```bash
 TARGET_PATH="${1:-.}"
 ./target/release/graphify-rs --target "$TARGET_PATH" --out ./graphify-out-rs
 ```
 
-### Step 3 - Analyze Results
+### Step 3 - Read and Analyze the Graph
 
-Read the generated `graph.json` and provide a high-level summary of the codebase architecture to the user based on the extracted nodes and edges.
+Read the generated `graph.json`. DO NOT print the raw JSON to the user. Instead, use tools like `jq` or `cat` combined with your context window to analyze the graph structure.
 
 ```bash
-cat ./graphify-out-rs/graph.json | jq '{nodes: .nodes | length, edges: .edges | length}'
+cat ./graphify-out-rs/graph.json | jq '{nodes: (.nodes | length), edges: (.edges | length)}'
 ```
 
-Based on the JSON data, answer any specific architectural questions the user asked.
+### Step 4 - Present the GRAPH REPORT
+
+You must generate a clear, Markdown-formatted report for the user based on the JSON data you just read. Your report MUST include:
+
+1. **Corpus Summary**: How many nodes and edges were found.
+2. **God Nodes**: Identify the top 3-5 nodes with the highest `pagerank` (if available) or the highest degree (most incoming/outgoing edges). Explain what role they likely play in the system (e.g., "Core configuration", "Main event loop").
+3. **Community Structure**: Look at how nodes cluster together. Group them into logical "Modules" based on their connectivity or naming conventions, and assign them a 2-5 word plain-language name (e.g. "AST Parsing Module", "Graph Analysis Core").
+4. **Architectural Insights**: Provide 1-2 bullet points explaining how the codebase is structured based on the graph.
+
+Always maintain an authoritative, analytical tone. You are a senior software architect presenting the codebase topology.
