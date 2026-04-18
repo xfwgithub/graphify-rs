@@ -1,22 +1,22 @@
 # graphify-rs
 
-`graphify-rs` 是针对 `graphify` (MCP Server & Codebase Knowledge Graph Generator) 的一个高性能、纯编译型 Rust 重构版本。
+`graphify-rs` 是一个高性能、纯静态编译的 **知识图谱提取引擎**，基于 Rust 重构自原版 `graphify`。
 
-它旨在彻底解决原版基于 Python 所带来的**环境依赖地狱**、**并发解析性能低下**以及**大规模图谱(NetworkX)内存膨胀**等痛点。它通过静态编译、零成本跨语言 FFI (Tree-sitter) 以及原生实现的高效图聚类算法，为大模型提供毫秒级延迟的代码库上下文注入能力。
+无论是复杂的**软件代码库 (Codebase)** 还是庞大的**小说设定/世界观笔记 (Worldbuilding)**，它都能在毫秒级时间内将你的目录结构、Markdown 笔记和代码文件转化为高度可关联的实体关系网络。它彻底解决了原版基于 Python 所带来的环境依赖地狱、并发解析性能低下以及大规模图谱内存膨胀等痛点。
 
 ---
 
 ## ⚡️ 核心特性
 
-- 🚀 **极速并发扫描**：利用 C 底层级的文件并发发现引擎 (`ignore` crate)，瞬间过滤 `node_modules`、`.git` 等无关噪音目录。
+- 🚀 **极速并发扫描**：利用 C 底层级的文件并发发现引擎 (`ignore` crate)，瞬间过滤 `node_modules` 或不需要的草稿文件夹。
 - 🔗 **多模态图谱提取**：
-  - **Markdown & 考据支持**：支持 `pulldown-cmark` 级别深度的 AST 树解析，能够抽取 `[[Wiki链接]]`、章节标题（Header）关联以及读取 YAML Frontmatter 内存（Q&A 飞轮）。
-  - **代码抽象语法树 (AST)**：基于 `tree-sitter-rs` 的超快速符号解析引擎（开发中），提取跨文件类/函数/引用的强连通依赖，无 Python 版中跨语言解析的序列化开销。
-- 🧠 **原生的 Leiden 社区聚类算法**：完全手搓实现、专门针对内存优化的 `Louvain/Leiden` 聚类引擎。支持 `Refinement` 细化策略以防止断连，彻底摆脱了复杂的 C++ (`graspologic`) 编译绑定，将散落的节点聚合为逻辑自洽的高内聚模块。
+  - **小说设定与 Markdown 解析**：完美支持 `pulldown-cmark` 级别深度的 AST 解析。极其适合写作！能够自动抽取 `[[人物A]]` 等 Wiki 链接、章节关联，读取 YAML Frontmatter 追踪人物出场属性。
+  - **代码抽象语法树 (AST)**：基于 `tree-sitter-rs` 的超快速符号解析引擎（开发中），提取跨文件类/函数/引用的强连通依赖。
+  - **大模型语义增强 (`--semantic`)**：集成兼容 OpenAI API 的深层语义提取，让 AI 帮你读懂剧情伏笔或代码底层架构。
+- 🧠 **原生的 Leiden 社区聚类算法**：完全手搓实现、专门针对内存优化的 `Louvain/Leiden` 聚类引擎。它能将散落的节点自动聚合为逻辑自洽的“高内聚模块”——在代码中这叫**功能模块**，在小说中这叫**阵营、势力或剧情线**。
 - 🔍 **图谱智能架构分析 (`analyze`)**：
-  - **God Nodes**：找出系统中连接最多的枢纽概念或超级类。
-  - **Surprising Connections (惊讶的连接)**：自动扫描跨越不同社区、跨代码与论文、周边节点直达中心枢纽的非凡/异常耦合结构，给大模型或人类极强的代码架构洞察力。
-- 🔌 **原生 MCP Server 支持**：通过 Stdin/Stdout 直接暴露符合 Model Context Protocol 的 JSON-RPC 接口，无缝挂载至 Claude / Trae 等 AI IDE。
+  - **God Nodes (枢纽节点)**：找出系统中连接最多的超级类，或者是小说中**最核心的关键人物/事件**。
+  - **Surprising Connections (惊讶的连接)**：自动扫描跨越不同社区的异常耦合结构，帮你发现代码架构坏味道，或是小说中**潜在的伏笔与未解决的冲突**。
 
 ---
 
@@ -68,33 +68,18 @@ chmod +x graphify-rs
 
 ### 3. 作为智能体 (AI Agent) 技能使用 (Trae Skill)
 
-你可以将 `graphify-rs` 作为自定义技能（Skill）无缝集成到 Trae 等支持本地技能定义的 AI IDE 中。
+你可以将 `graphify-rs` 作为自定义技能（Skill）无缝集成到 Trae 等支持本地技能定义的 AI IDE 中。**这是在写作时极度推荐的用法！**
 
 #### 在 Trae 中配置 Skill
 
-在你的项目根目录下创建 `.trae/skills/graphify-rs/SKILL.md` 文件，并填入以下内容：
+在你的项目（或小说文件夹）根目录下创建 `.trae/skills/graphify-rs/SKILL.md` 文件。你可以直接参考本项目自带的 [SKILL.md](.trae/skills/graphify-rs/SKILL.md) 模板。
 
-```markdown
----
-name: "graphify-rs"
-description: "使用 graphify-rs 提取代码库知识图谱。当用户需要分析代码架构、提取全量 AST/Markdown 关联关系或生成 graph.json 时调用。"
----
+当配置完成后，在对话中向 Trae 下达指令，AI 即可自动识别。例如：
 
-# graphify-rs 知识图谱引擎
+*   **对于写小说**：`"帮我分析一下小说的大纲关系"` 或 `"/graphify-rs path '亚瑟' '冰霜巨龙'"`
+*   **对于写代码**：`"帮我梳理这个项目的核心架构"`
 
-此技能使用 `graphify-rs` 二进制工具极速扫描当前代码库，生成包含代码 AST 和 Markdown 关联的知识图谱 (`graph.json`)。
-
-## 使用方法
-
-1. 确保已下载或编译 `graphify-rs` 二进制文件。
-2. 运行命令生成图谱：
-   ```bash
-   /绝对路径/到你的/graphify-rs --target . --out ./graphify-out-rs
-   ```
-3. 分析生成的 `./graphify-out-rs/graph.json`，根据节点之间的连接回答用户的代码架构问题。
-```
-
-当配置完成后，在对话中向 Trae 下达指令，AI 即可自动识别并在需要分析架构时调用该技能进行极速图谱生成。
+AI 会在后台自动执行图谱生成，阅读 JSON 关系网，并为你出具一份完美的《剧情梳理报告》或《代码架构分析》。
 
 ### 4. 从源码编译 (可选)
 
