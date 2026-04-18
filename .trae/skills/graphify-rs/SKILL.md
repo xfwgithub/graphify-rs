@@ -23,15 +23,57 @@ Follow these steps in order based on the user's command.
 
 ### Step 1 - Ensure graphify-rs is installed
 
-Check if `graphify-rs` is in the system PATH. If not, install it globally using Cargo so it can be run from anywhere.
+Check if `graphify-rs` is in the system PATH. If not, try to download the pre-compiled binary. If that fails or `cargo` is preferred, install it globally using Cargo.
 
 ```bash
 if ! command -v graphify-rs &> /dev/null; then
-    echo "Installing graphify-rs globally..."
-    if [ -f "Cargo.toml" ] && grep -q 'name = "graphify-rs"' Cargo.toml; then
-        cargo install --path .
-    else
-        cargo install --git https://github.com/xfwgithub/graphify-rs.git
+    echo "graphify-rs not found. Installing..."
+    
+    # Try downloading pre-compiled binary first (requires curl and jq)
+    if command -v curl &> /dev/null && command -v jq &> /dev/null; then
+        OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+        ARCH="$(uname -m)"
+        
+        if [ "$OS" = "darwin" ]; then
+            if [ "$ARCH" = "arm64" ]; then ASSET_NAME="graphify-rs-macos-aarch64"
+            else ASSET_NAME="graphify-rs-macos-x86_64"; fi
+        elif [ "$OS" = "linux" ]; then
+            ASSET_NAME="graphify-rs-linux-x86_64"
+        fi
+        
+        if [ -n "$ASSET_NAME" ]; then
+            echo "Downloading $ASSET_NAME..."
+            DOWNLOAD_URL=$(curl -s https://api.github.com/repos/xfwgithub/graphify-rs/releases/latest | jq -r ".assets[] | select(.name == \"$ASSET_NAME\") | .browser_download_url")
+            if [ -n "$DOWNLOAD_URL" ] && [ "$DOWNLOAD_URL" != "null" ]; then
+                curl -L -o /usr/local/bin/graphify-rs "$DOWNLOAD_URL" || curl -L -o ~/.cargo/bin/graphify-rs "$DOWNLOAD_URL" || curl -L -o /tmp/graphify-rs "$DOWNLOAD_URL"
+                
+                # Make executable and link if downloaded to tmp
+                if [ -f "/tmp/graphify-rs" ]; then
+                    chmod +x /tmp/graphify-rs
+                    mkdir -p ~/.local/bin
+                    mv /tmp/graphify-rs ~/.local/bin/graphify-rs
+                    export PATH="$HOME/.local/bin:$PATH"
+                else
+                    chmod +x /usr/local/bin/graphify-rs 2>/dev/null || chmod +x ~/.cargo/bin/graphify-rs 2>/dev/null
+                fi
+                echo "Successfully downloaded pre-compiled binary."
+            fi
+        fi
+    fi
+    
+    # Fallback to cargo install if the binary download failed or wasn't attempted
+    if ! command -v graphify-rs &> /dev/null; then
+        if command -v cargo &> /dev/null; then
+            echo "Falling back to Cargo installation..."
+            if [ -f "Cargo.toml" ] && grep -q 'name = "graphify-rs"' Cargo.toml; then
+                cargo install --path .
+            else
+                cargo install --git https://github.com/xfwgithub/graphify-rs.git
+            fi
+        else
+            echo "Error: Neither pre-compiled binary could be downloaded nor Cargo is available."
+            exit 1
+        fi
     fi
 fi
 ```
