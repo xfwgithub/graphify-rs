@@ -12,6 +12,7 @@ Turn any folder of files (especially novel drafts, worldbuilding notes, and char
 ```bash
 /graphify-rs                               # full pipeline on current directory
 /graphify-rs <path>                        # full pipeline on specific path
+/graphify-rs <path> --update               # incremental update (only extract semantics for changed files)
 /graphify-rs query "<question>"            # answer a question using the story graph context
 /graphify-rs path "<CharA>" "<CharB>"      # find connections and conflicts between two characters/events
 /graphify-rs explain "<EntityName>"        # explain a specific character/location and its relationships
@@ -103,7 +104,10 @@ Instead, read the JSON file and answer the user directly based on the nodes and 
 
 ### Step 3 - Extract Semantic Relationships (AI-assisted)
 
-If the user invoked the full pipeline (no subcommand), you must first generate the implicit semantic edges.
+If the user invoked the full pipeline, you must first generate the implicit semantic edges.
+
+**If the user passed `--update`:**
+Check if `.graphify_semantic.json` already exists. If it does, only read files that were modified recently (or that you haven't seen before). Generate new semantic edges ONLY for those new/changed files, and MERGE them into the existing `.graphify_semantic.json` array before saving.
 
 Read the key novel draft files or notes in the target directory and generate a valid JSON file named `.graphify_semantic.json` containing:
 ```json
