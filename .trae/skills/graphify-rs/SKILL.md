@@ -5,17 +5,31 @@ description: "Turn any codebase into a navigable knowledge graph using the high-
 
 # /graphify-rs
 
-Turn any folder of files into a navigable knowledge graph with blazingly fast AST/Markdown parsing, community detection, and AI semantic extraction.
+Turn any folder of files (especially novel drafts, worldbuilding notes, and character profiles) into a navigable knowledge graph with blazingly fast Markdown parsing, community detection, and AI semantic extraction.
 
 ## Usage
 
 ```bash
 /graphify-rs                               # full pipeline on current directory
 /graphify-rs <path>                        # full pipeline on specific path
-/graphify-rs query "<question>"            # answer a question using the graph context
-/graphify-rs path "<NodeA>" "<NodeB>"      # find connections between two concepts
-/graphify-rs explain "<NodeName>"          # explain a specific node and its relationships
+/graphify-rs query "<question>"            # answer a question using the story graph context
+/graphify-rs path "<CharA>" "<CharB>"      # find connections and conflicts between two characters/events
+/graphify-rs explain "<EntityName>"        # explain a specific character/location and its relationships
 ```
+
+## What graphify-rs is for
+
+`graphify-rs` is built around the concept of instantly understanding complex narratives and worldbuilding. Drop it into your novel's repository, and get a structured knowledge graph that shows you hidden character arcs, unresolved conflicts, and lore connections.
+
+Three things it does that Claude alone cannot:
+1. **Persistent story graph** - relationships are extracted natively and stored in `graphify-out-rs/graph.json`. You can query character motivations without reading thousands of words into context.
+2. **Deterministic Speed** - It uses `pulldown-cmark` to parse your Markdown notes and `[[Wiki Links]]` in milliseconds.
+3. **Cross-document surprise** - Built-in Leiden community detection finds connections between characters in different subplots that you would never think to ask about directly.
+
+Use it for:
+- A complex novel with many subplots (understand the web of relationships)
+- Discovering "God Nodes" (the most central characters or pivotal events)
+- Finding "Surprising Connections" (how seemingly unrelated factions or events interact)
 
 ## What You Must Do When Invoked
 
@@ -91,18 +105,18 @@ Instead, read the JSON file and answer the user directly based on the nodes and 
 
 If the user invoked the full pipeline (no subcommand), you must first generate the implicit semantic edges.
 
-Read the key files in the target directory and generate a valid JSON file named `.graphify_semantic.json` containing:
+Read the key novel draft files or notes in the target directory and generate a valid JSON file named `.graphify_semantic.json` containing:
 ```json
 {
   "nodes": [
-    {"id": "unique_id", "label": "Human Readable Name", "kind": "concept|function|class", "properties": {}, "pagerank": 0.0}
+    {"id": "unique_id", "label": "Human Readable Name", "kind": "character|event|location|faction|item", "properties": {}, "pagerank": 0.0}
   ],
   "edges": [
-    {"source": "node_id", "target": "node_id", "kind": "conceptually_related_to|calls|implements", "weight": 0.8}
+    {"source": "node_id", "target": "node_id", "kind": "allies_with|enemies_with|loves|betrays|participates_in|belongs_to|occurs_at", "weight": 0.8}
   ]
 }
 ```
-*Note: Focus only on finding deep, cross-file architectural or semantic connections that simple ASTs miss.*
+*Note: Focus on extracting narrative arcs, character relationships, and conflicts that aren't explicitly linked via Markdown `[[links]]`.*
 
 ### Step 4 - Run Extraction & Import Semantics
 
@@ -121,13 +135,13 @@ Read the generated `graph.json`. DO NOT print the raw JSON to the user. Instead,
 cat ./graphify-out-rs/graph.json | jq '{nodes: (.nodes | length), edges: (.edges | length)}'
 ```
 
-### Step 6 - Present the GRAPH REPORT
+### Step 6 - Present the STORY GRAPH REPORT
 
 You must generate a clear, Markdown-formatted report for the user based on the JSON data you just read. Your report MUST include:
 
-1. **Corpus Summary**: How many nodes and edges were found.
-2. **God Nodes**: Identify the top 3-5 nodes with the highest `pagerank` (if available) or the highest degree (most incoming/outgoing edges). Explain what role they likely play in the system (e.g., "Core configuration", "Main event loop").
-3. **Community Structure**: Look at how nodes cluster together. Group them into logical "Modules" based on their connectivity or naming conventions, and assign them a 2-5 word plain-language name (e.g. "AST Parsing Module", "Graph Analysis Core").
-4. **Architectural Insights**: Provide 1-2 bullet points explaining how the codebase is structured based on the graph.
+1. **Story Corpus Summary**: How many entities (characters/events) and relationship edges were found.
+2. **Pivotal Nodes (God Nodes)**: Identify the top 3-5 characters or events with the highest `pagerank` or highest degree. Explain why they are central to the narrative web (e.g., "The central antagonist connecting 3 different subplots").
+3. **Factions & Story Arcs (Communities)**: Look at how nodes cluster together. Group them into logical "Factions", "Locations", or "Subplots" based on their connectivity, and assign them a 2-5 word plain-language name (e.g. "The Royal Court Intrigue", "The Rebellion Camp").
+4. **Narrative Insights & Unresolved Conflicts**: Provide 1-2 bullet points highlighting surprising connections or potential plot holes based on the graph (e.g., "Character A and C are deeply connected through Event B, but haven't interacted directly").
 
-Always maintain an authoritative, analytical tone. You are a senior software architect presenting the codebase topology.
+Always maintain an authoritative, analytical tone. You are an expert editor and story architect analyzing the narrative topology.
