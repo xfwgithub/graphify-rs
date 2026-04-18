@@ -5,38 +5,25 @@ description: "Turn any codebase into a navigable knowledge graph using the high-
 
 # /graphify-rs
 
-Turn any folder of files into a navigable knowledge graph with blazingly fast AST/Markdown parsing, community detection, and zero Python/LLM overhead.
+Turn any folder of files into a navigable knowledge graph with blazingly fast AST/Markdown parsing, community detection, and AI semantic extraction.
 
 ## Usage
 
 ```bash
 /graphify-rs                               # full pipeline on current directory
 /graphify-rs <path>                        # full pipeline on specific path
+/graphify-rs query "<question>"            # answer a question using the graph context
+/graphify-rs path "<NodeA>" "<NodeB>"      # find connections between two concepts
+/graphify-rs explain "<NodeName>"          # explain a specific node and its relationships
 ```
-
-## What graphify-rs is for
-
-`graphify-rs` is built around the concept of instantly understanding complex codebases. Drop it into any repository, and get a structured knowledge graph that shows you what you didn't know was connected.
-
-Three things it does that Claude alone cannot:
-1. **Persistent graph** - relationships are extracted natively and stored in `graphify-out-rs/graph.json`. You can query the architecture without reading thousands of files into context.
-2. **Deterministic Speed** - Instead of slow LLM-based semantic extraction, it uses `tree-sitter` and `pulldown-cmark` to parse code and Markdown in milliseconds.
-3. **Cross-document surprise** - Built-in Leiden community detection finds connections between concepts in different modules that you would never think to ask about directly.
-
-Use it for:
-- A codebase you're new to (understand architecture before touching anything)
-- Discovering "God Nodes" (the most central/coupled files in a project)
-- Finding "Surprising Connections" (how seemingly unrelated communities interact)
 
 ## What You Must Do When Invoked
 
-If no path was given, use `.` (current directory). Do not ask the user for a path.
-
-Follow these steps in order. Do not skip steps.
+Follow these steps in order based on the user's command.
 
 ### Step 1 - Ensure graphify-rs is compiled
 
-Check if the release binary exists. If not, compile it automatically. Do not ask the user.
+Check if the release binary exists. If not, compile it automatically.
 
 ```bash
 if [ ! -f "target/release/graphify-rs" ]; then
@@ -45,11 +32,20 @@ if [ ! -f "target/release/graphify-rs" ]; then
 fi
 ```
 
-### Step 2 - Extract Semantic Relationships (AI-assisted)
+### Step 2 - Parse Intent & Handle Queries
 
-Since you (the AI) have the ability to read files and understand semantics, you will generate the implicit semantic edges before running the tool.
+If the user invoked a read-only command (`query`, `path`, or `explain`), DO NOT run the full extraction again if `graphify-out-rs/graph.json` already exists. 
+Instead, read the JSON file and answer the user directly based on the nodes and edges:
+- **query**: Traverse the graph to answer the architectural question.
+- **path**: Find the shortest or most relevant path between the two nodes in the JSON.
+- **explain**: List the incoming/outgoing edges of the specific node and summarize its role.
+*Stop here if the user invoked one of these commands.*
 
-Read the key files in the directory and generate a valid JSON file named `.graphify_semantic.json` containing:
+### Step 3 - Extract Semantic Relationships (AI-assisted)
+
+If the user invoked the full pipeline (no subcommand), you must first generate the implicit semantic edges.
+
+Read the key files in the target directory and generate a valid JSON file named `.graphify_semantic.json` containing:
 ```json
 {
   "nodes": [
@@ -62,7 +58,7 @@ Read the key files in the directory and generate a valid JSON file named `.graph
 ```
 *Note: Focus only on finding deep, cross-file architectural or semantic connections that simple ASTs miss.*
 
-### Step 3 - Run Extraction & Import Semantics
+### Step 4 - Run Extraction & Import Semantics
 
 Run the extraction on the target directory, importing the semantic JSON you just created.
 
@@ -71,7 +67,7 @@ TARGET_PATH="${1:-.}"
 ./target/release/graphify-rs --target "$TARGET_PATH" --import-semantic .graphify_semantic.json --out ./graphify-out-rs
 ```
 
-### Step 4 - Read and Analyze the Graph
+### Step 5 - Read and Analyze the Graph
 
 Read the generated `graph.json`. DO NOT print the raw JSON to the user. Instead, use tools like `jq` or `cat` combined with your context window to analyze the graph structure.
 
@@ -79,7 +75,7 @@ Read the generated `graph.json`. DO NOT print the raw JSON to the user. Instead,
 cat ./graphify-out-rs/graph.json | jq '{nodes: (.nodes | length), edges: (.edges | length)}'
 ```
 
-### Step 5 - Present the GRAPH REPORT
+### Step 6 - Present the GRAPH REPORT
 
 You must generate a clear, Markdown-formatted report for the user based on the JSON data you just read. Your report MUST include:
 
