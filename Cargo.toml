@@ -28,6 +28,7 @@ serde_json = "1.0"
 clap = { version = "4.5", features = ["derive"] }
 anyhow = "1.0"
 regex = "1.10"
+reqwest = { version = "0.12", features = ["json"] }
 
 # 文件遍历
 ignore = "0.4"
