@@ -45,16 +45,33 @@ if [ ! -f "target/release/graphify-rs" ]; then
 fi
 ```
 
-### Step 2 - Run Extraction
+### Step 2 - Extract Semantic Relationships (AI-assisted)
 
-Run the extraction on the target directory.
+Since you (the AI) have the ability to read files and understand semantics, you will generate the implicit semantic edges before running the tool.
+
+Read the key files in the directory and generate a valid JSON file named `.graphify_semantic.json` containing:
+```json
+{
+  "nodes": [
+    {"id": "unique_id", "label": "Human Readable Name", "kind": "concept|function|class", "properties": {}, "pagerank": 0.0}
+  ],
+  "edges": [
+    {"source": "node_id", "target": "node_id", "kind": "conceptually_related_to|calls|implements", "weight": 0.8}
+  ]
+}
+```
+*Note: Focus only on finding deep, cross-file architectural or semantic connections that simple ASTs miss.*
+
+### Step 3 - Run Extraction & Import Semantics
+
+Run the extraction on the target directory, importing the semantic JSON you just created.
 
 ```bash
 TARGET_PATH="${1:-.}"
-./target/release/graphify-rs --target "$TARGET_PATH" --out ./graphify-out-rs
+./target/release/graphify-rs --target "$TARGET_PATH" --import-semantic .graphify_semantic.json --out ./graphify-out-rs
 ```
 
-### Step 3 - Read and Analyze the Graph
+### Step 4 - Read and Analyze the Graph
 
 Read the generated `graph.json`. DO NOT print the raw JSON to the user. Instead, use tools like `jq` or `cat` combined with your context window to analyze the graph structure.
 
@@ -62,7 +79,7 @@ Read the generated `graph.json`. DO NOT print the raw JSON to the user. Instead,
 cat ./graphify-out-rs/graph.json | jq '{nodes: (.nodes | length), edges: (.edges | length)}'
 ```
 
-### Step 4 - Present the GRAPH REPORT
+### Step 5 - Present the GRAPH REPORT
 
 You must generate a clear, Markdown-formatted report for the user based on the JSON data you just read. Your report MUST include:
 

@@ -28,6 +28,10 @@ struct Args {
     /// 开启 LLM 语义提取 (Enable semantic extraction via LLM)
     #[arg(long)]
     semantic: bool,
+
+    /// 导入外部提取的语义节点和边 JSON (Import external semantic JSON file)
+    #[arg(long)]
+    import_semantic: Option<String>,
 }
 
 #[tokio::main]
@@ -98,6 +102,35 @@ async fn main() -> Result<()> {
             properties: serde_json::json!({}),
             pagerank: 0.0,
         });
+    }
+
+    // Import external semantic JSON if provided
+    if let Some(import_file) = &args.import_semantic {
+        if let Ok(content) = std::fs::read_to_string(import_file) {
+            println!("🔄 正在导入外部语义文件: {}", import_file);
+            // Simple anonymous struct to parse imported nodes and edges
+            #[derive(serde::Deserialize)]
+            struct ImportedGraph {
+                #[serde(default)]
+                nodes: Vec<models::Node>,
+                #[serde(default)]
+                edges: Vec<models::Edge>,
+            }
+            
+            if let Ok(imported) = serde_json::from_str::<ImportedGraph>(&content) {
+                for node in imported.nodes {
+                    graph_manager.add_node(node);
+                }
+                for edge in imported.edges {
+                    graph_manager.add_edge(&edge.source.clone(), &edge.target.clone(), edge);
+                }
+                println!("✅ 成功导入外部语义图谱");
+            } else {
+                println!("❌ 无法解析外部语义文件 JSON 格式");
+            }
+        } else {
+            println!("❌ 无法读取外部语义文件: {}", import_file);
+        }
     }
 
     graph_manager.compute_pagerank(10, 0.85);
