@@ -66,37 +66,35 @@ chmod +x graphify-rs
 ./graphify-rs --mcp
 ```
 
-### 3. 作为智能体 (AI Agent) 技能使用 (MCP)
+### 3. 作为智能体 (AI Agent) 技能使用 (Trae Skill)
 
-`graphify-rs` 原生支持 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/)，这意味着你可以直接将它作为技能（Tool/Skill）挂载到支持 MCP 的 AI 助手（如 Claude Desktop, Trae, Cursor 等）中。
+你可以将 `graphify-rs` 作为自定义技能（Skill）无缝集成到 Trae 等支持本地技能定义的 AI IDE 中。
 
-挂载后，AI 助手将自动获得以下两个强大的代码库分析技能：
-- `graphify_extract`：读取并提取指定目录的代码知识图谱。
-- `graphify_search`：在提取的知识图谱中进行语义搜索与关系查询。
+#### 在 Trae 中配置 Skill
 
-#### 在 Claude Desktop 中配置
-打开 Claude Desktop 的配置文件（macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`），添加如下配置：
+在你的项目根目录下创建 `.trae/skills/graphify-rs/SKILL.md` 文件，并填入以下内容：
 
-```json
-{
-  "mcpServers": {
-    "graphify-rs": {
-      "command": "/绝对路径/到你的/graphify-rs",
-      "args": ["--mcp"]
-    }
-  }
-}
+```markdown
+---
+name: "graphify-rs"
+description: "使用 graphify-rs 提取代码库知识图谱。当用户需要分析代码架构、提取全量 AST/Markdown 关联关系或生成 graph.json 时调用。"
+---
+
+# graphify-rs 知识图谱引擎
+
+此技能使用 `graphify-rs` 二进制工具极速扫描当前代码库，生成包含代码 AST 和 Markdown 关联的知识图谱 (`graph.json`)。
+
+## 使用方法
+
+1. 确保已下载或编译 `graphify-rs` 二进制文件。
+2. 运行命令生成图谱：
+   ```bash
+   /绝对路径/到你的/graphify-rs --target . --out ./graphify-out-rs
+   ```
+3. 分析生成的 `./graphify-out-rs/graph.json`，根据节点之间的连接回答用户的代码架构问题。
 ```
-*注意：请将 `command` 替换为你实际下载或编译出的 `graphify-rs` 二进制文件的绝对路径。*
 
-#### 在 Trae / Cursor 等 AI IDE 中配置
-1. 打开 IDE 的 MCP 设置面板（通常在 Settings -> MCP 或 AI 设置中）。
-2. 添加一个新的 MCP Server：
-   - **Name**: `graphify-rs`
-   - **Type**: `command` (或 `stdio`)
-   - **Command**: `/绝对路径/到你的/graphify-rs`
-   - **Args**: `--mcp`
-3. 保存并启用，IDE 中的 AI 助手即可随时调用你的极速图谱分析引擎！
+当配置完成后，在对话中向 Trae 下达指令，AI 即可自动识别并在需要分析架构时调用该技能进行极速图谱生成。
 
 ### 4. 从源码编译 (可选)
 
