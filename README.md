@@ -39,15 +39,44 @@
 
 ## 📦 快速开始
 
+由于 `graphify-rs` 是纯静态编译的二进制文件，你无需安装任何运行环境（如 Python、Node.js 或 Rust），直接下载即可运行。
+
+### 1. 下载预编译包
+
+请前往 [GitHub Releases 页面](https://github.com/xfwgithub/graphify-rs/releases/latest) 下载适合你操作系统的预编译包：
+- **macOS (Apple Silicon)**: `graphify-rs-macos-aarch64`
+- **macOS (Intel)**: `graphify-rs-macos-x86_64`
+- **Linux**: `graphify-rs-linux-x86_64`
+- **Windows**: `graphify-rs-windows-x86_64.exe`
+
+下载后，为了方便使用，你可以将其重命名为 `graphify-rs` 并赋予执行权限：
+
 ```bash
-# 1. 编译极速 Release 版
+# macOS / Linux
+chmod +x graphify-rs
+```
+
+### 2. 本地使用
+
+```bash
+# 扫描指定目录，生成知识图谱 graph.json
+./graphify-rs --target /path/to/your/codebase --out ./graphify-out-rs
+
+# 作为大模型 MCP 服务端启动 (与 AI IDE 结合)
+./graphify-rs --mcp
+```
+
+### 3. 从源码编译 (可选)
+
+如果你想参与开发或自己编译：
+
+```bash
+# 1. 确保已安装 Rust 工具链 (https://rustup.rs/)
+# 2. 编译极速 Release 版
 cargo build --release
 
-# 2. 扫描指定目录，生成 graph.json
-./target/release/graphify-rs --target /path/to/your/codebase --out ./graphify-out-rs
-
-# 3. 启动为大模型 MCP 服务端
-./target/release/graphify-rs --mcp
+# 3. 运行
+./target/release/graphify-rs --help
 ```
 
 ## 🏗 技术栈与底层依赖
