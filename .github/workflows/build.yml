@@ -1,0 +1,79 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build for ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            binary_name: graphify-rs
+            asset_name: graphify-rs-linux-x86_64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            binary_name: graphify-rs
+            asset_name: graphify-rs-macos-x86_64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            binary_name: graphify-rs
+            asset_name: graphify-rs-macos-aarch64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            binary_name: graphify-rs.exe
+            asset_name: graphify-rs-windows-x86_64.exe
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ matrix.target }}
+        
+    - name: Build
+      run: cargo build --release --target ${{ matrix.target }}
+      
+    - name: Rename Artifact (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      run: mv target/${{ matrix.target }}/release/${{ matrix.binary_name }} ${{ matrix.asset_name }}
+        
+    - name: Rename Artifact (Windows)
+      if: matrix.os == 'windows-latest'
+      run: move target\${{ matrix.target }}\release\${{ matrix.binary_name }} ${{ matrix.asset_name }}
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.asset_name }}
+        path: ${{ matrix.asset_name }}
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        merge-multiple: true
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: artifacts/*
+        generate_release_notes: true
