@@ -1,0 +1,75 @@
+{
+  "edges": [],
+  "nodes": [
+    {
+      "id": "./target/release/build/serde_core-614172d28c84b4b8/out/private.rs",
+      "kind": "file",
+      "label": "./target/release/build/serde_core-614172d28c84b4b8/out/private.rs",
+      "pagerank": 0.10000000000000007,
+      "properties": {}
+    },
+    {
+      "id": "./target/release/build/serde-65d43fa14511931c/out/private.rs",
+      "kind": "file",
+      "label": "./target/release/build/serde-65d43fa14511931c/out/private.rs",
+      "pagerank": 0.10000000000000007,
+      "properties": {}
+    },
+    {
+      "id": "./target/debug/build/serde-0e8e8a817c3d4882/out/private.rs",
+      "kind": "file",
+      "label": "./target/debug/build/serde-0e8e8a817c3d4882/out/private.rs",
+      "pagerank": 0.10000000000000007,
+      "properties": {}
+    },
+    {
+      "id": "./target/debug/build/serde_core-a18c5bc705536fe8/out/private.rs",
+      "kind": "file",
+      "label": "./target/debug/build/serde_core-a18c5bc705536fe8/out/private.rs",
+      "pagerank": 0.10000000000000007,
+      "properties": {}
+    },
+    {
+      "id": "./src/graph.rs",
+      "kind": "file",
+      "label": "./src/graph.rs",
+      "pagerank": 0.10000000000000007,
+      "properties": {}
+    },
+    {
+      "id": "./src/lib.rs",
+      "kind": "file",
+      "label": "./src/lib.rs",
+      "pagerank": 0.10000000000000007,
+      "properties": {}
+    },
+    {
+      "id": "./src/models.rs",
+      "kind": "file",
+      "label": "./src/models.rs",
+      "pagerank": 0.10000000000000007,
+      "properties": {}
+    },
+    {
+      "id": "./src/scanner.rs",
+      "kind": "file",
+      "label": "./src/scanner.rs",
+      "pagerank": 0.10000000000000007,
+      "properties": {}
+    },
+    {
+      "id": "./src/main.rs",
+      "kind": "file",
+      "label": "./src/main.rs",
+      "pagerank": 0.10000000000000007,
+      "properties": {}
+    },
+    {
+      "id": "./src/mcp.rs",
+      "kind": "file",
+      "label": "./src/mcp.rs",
+      "pagerank": 0.10000000000000007,
+      "properties": {}
+    }
+  ]
+}

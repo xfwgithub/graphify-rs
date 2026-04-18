@@ -1,0 +1,34 @@
+[package]
+name = "graphify-rs"
+version = "0.1.0"
+edition = "2021"
+description = "A fast, compiled codebase knowledge graph generator and MCP server"
+
+[dependencies]
+# AST 解析
+tree-sitter = "0.20"
+tree-sitter-python = "0.20"
+tree-sitter-rust = "0.20"
+tree-sitter-go = "0.20"
+
+# Markdown 解析
+pulldown-cmark = "0.10"
+yaml-rust = "0.4"
+
+# 图数据结构与算法
+petgraph = "0.6"
+
+# 并发与异步
+tokio = { version = "1.37", features = ["full"] }
+rayon = "1.10"
+
+# 序列化与命令行
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+anyhow = "1.0"
+regex = "1.10"
+
+# 文件遍历
+ignore = "0.4"
+rand = "0.10.1"

@@ -1,0 +1,58 @@
+{
+  "analysis": {
+    "god_nodes": [],
+    "surprising_connections": []
+  },
+  "edges": [],
+  "nodes": [
+    {
+      "id": "./src/graph.rs",
+      "kind": "file",
+      "label": "./src/graph.rs",
+      "pagerank": 0.14285714285714285,
+      "properties": {}
+    },
+    {
+      "id": "./src/lib.rs",
+      "kind": "file",
+      "label": "./src/lib.rs",
+      "pagerank": 0.14285714285714285,
+      "properties": {}
+    },
+    {
+      "id": "./src/models.rs",
+      "kind": "file",
+      "label": "./src/models.rs",
+      "pagerank": 0.14285714285714285,
+      "properties": {}
+    },
+    {
+      "id": "./src/detect.rs",
+      "kind": "file",
+      "label": "./src/detect.rs",
+      "pagerank": 0.14285714285714285,
+      "properties": {}
+    },
+    {
+      "id": "./src/analyze.rs",
+      "kind": "file",
+      "label": "./src/analyze.rs",
+      "pagerank": 0.14285714285714285,
+      "properties": {}
+    },
+    {
+      "id": "./src/main.rs",
+      "kind": "file",
+      "label": "./src/main.rs",
+      "pagerank": 0.14285714285714285,
+      "properties": {}
+    },
+    {
+      "id": "./src/mcp.rs",
+      "kind": "file",
+      "label": "./src/mcp.rs",
+      "pagerank": 0.14285714285714285,
+      "properties": {}
+    }
+  ]
+}
